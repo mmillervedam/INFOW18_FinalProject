@@ -39,6 +39,3 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 * [School Survey on Crime and Safety](http://nces.ed.gov/surveys/ssocs/data_products.asp) -- put out by the National Center for Ed Stats... probably less usefule b/c it uses random sampling and is not specific to NYC...
 
 =======
-* [School Survey on Crime and Safety](http://nces.ed.gov/surveys/ssocs/data_products.asp) -- put out by the National Center for Ed Stats... probably less usefule b/c it uses random sampling and is not specific to NYC...
->>>>>>> c212ddeec91e153ce6cfd9dd358bcf958aa2bd9c
->>>>>>> 3bef2d0e36fe63b5bff485fb1a2d80a7c46185a4
