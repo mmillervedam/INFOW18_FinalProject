@@ -3,3 +3,5 @@ NEW_York_City_Population*
 School_Safety_Report.csv
 *.ipynb_checkpoints/*
 *checkpoint.ipynb
+*.xls
+*.csv
