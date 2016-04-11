@@ -38,10 +38,4 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 
 * [School Survey on Crime and Safety](http://nces.ed.gov/surveys/ssocs/data_products.asp) -- put out by the National Center for Ed Stats... probably less usefule b/c it uses random sampling and is not specific to NYC...
 
-* [Dept of Ed Districts](http://schools.nyc.gov/schoolsearch/) -- school search website, the districts in our data set seem to be school districts but this site doesn't clearly lay out their lines.
-
-* [NYC Zoning Districts](http://www1.nyc.gov/site/planning/zoning/index-map.page) -- there are 31 of them but they don't seem to correspond to the numbers in our dataset.
-
-* [NYC Maps and Demographic info](http://www.baruch.cuny.edu/nycdata/population-geography/index.html) -- courtesy of CUNY, includes links to maps of 'Districts' and 'Neighborhoods' , but again the number systems doesn't seem to match ours.
-
 =======
