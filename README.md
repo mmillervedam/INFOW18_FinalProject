@@ -3,7 +3,7 @@ Repo for our shared work on the final project.
 
 [Project Proposal Google Doc](https://docs.google.com/document/d/1NgYAWtXdJbUWn-bTRg8dUD_qQlX3vMj29wX9dXT1TGc/edit)
 
-===
+--- 
 
 The Proposal
 
@@ -28,7 +28,7 @@ School Safety: https://catalog.data.gov/dataset/school-safety-report-8067a
 
 Population: https://catalog.data.gov/dataset/new-york-city-population-by-boroughs-fd2c0
 
-===
+---
 
 ## Links that may later be of use to us:
 
@@ -38,7 +38,6 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 
 * [School Survey on Crime and Safety](http://nces.ed.gov/surveys/ssocs/data_products.asp) -- put out by the National Center for Ed Stats... probably less usefule b/c it uses random sampling and is not specific to NYC...
 
-<<<<<<< HEAD
 * [Dept of Ed Districts](http://schools.nyc.gov/schoolsearch/) -- school search website, the districts in our data set seem to be school districts but this site doesn't clearly lay out their lines.
 
 * [NYC Zoning Districts](http://www1.nyc.gov/site/planning/zoning/index-map.page) -- there are 31 of them but they don't seem to correspond to the numbers in our dataset.
