@@ -38,6 +38,7 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 
 * [School Survey on Crime and Safety](http://nces.ed.gov/surveys/ssocs/data_products.asp) -- put out by the National Center for Ed Stats... probably less usefule b/c it uses random sampling and is not specific to NYC...
 
+<<<<<<< HEAD
 * [Dept of Ed Districts](http://schools.nyc.gov/schoolsearch/) -- school search website, the districts in our data set seem to be school districts but this site doesn't clearly lay out their lines.
 
 * [NYC Zoning Districts](http://www1.nyc.gov/site/planning/zoning/index-map.page) -- there are 31 of them but they don't seem to correspond to the numbers in our dataset.
@@ -47,7 +48,9 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 * [Java script re: longitude and latitude](https://developers.google.com/maps/documentation/javascript/examples/layer-heatmap)
 
 * [School Locations](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr)
-=======
+
+---
+
 ## NOTES
 
 * Juveniles are able to be charged with felonies. Generally, they are held as minors in Juvenile court (punishable until they are 18), but if it is not the first charge or if the prosecutor can present evidence that the child should be tried as an adult, then the child as young as 14 could be tried as an adult (judge’s decision). The judge has to do what is in the best interest of both the child and the public. In short, there could be overlap in our data of school violence and felonies in the area. Maybe we could definitely find the ones where  the address of the felony is at a school?
