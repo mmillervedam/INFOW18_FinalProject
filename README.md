@@ -44,4 +44,10 @@ Population: https://catalog.data.gov/dataset/new-york-city-population-by-borough
 
 * [NYC Maps and Demographic info](http://www.baruch.cuny.edu/nycdata/population-geography/index.html) -- courtesy of CUNY, includes links to maps of 'Districts' and 'Neighborhoods' , but again the number systems doesn't seem to match ours.
 
+* [Java script re: longitude and latitude](https://developers.google.com/maps/documentation/javascript/examples/layer-heatmap)
+
+* [School Locations](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr)
 =======
+## NOTES
+
+* Juveniles are able to be charged with felonies. Generally, they are held as minors in Juvenile court (punishable until they are 18), but if it is not the first charge or if the prosecutor can present evidence that the child should be tried as an adult, then the child as young as 14 could be tried as an adult (judge’s decision). The judge has to do what is in the best interest of both the child and the public. In short, there could be overlap in our data of school violence and felonies in the area. Maybe we could definitely find the ones where  the address of the felony is at a school?
