@@ -7,3 +7,4 @@ School_Safety_Report.csv
 *.csv
 *.txt
 *.xlsx
+__pycache__/
