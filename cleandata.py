@@ -1,7 +1,20 @@
+"""
+Data cleaning functions for
+ INFOW18 Final Project (NYC Crime)
+"""
+
+# TODO: Add tally columns to vadir final data set
+# TODO: Re-order columns - is this needed?
+# TODO: Create function to clean other data
+
+# imports
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
+
+##############################################################
+# Helper functions for VADIR cleaning
 def vadir_column_data_row(df):
 	"""
 	Helper function to determine where the column index starts
@@ -15,11 +28,11 @@ def vadir_column_data_row(df):
 	return irow
 
 def vadir_clean_cnames(df, row_num, replace_dict = {}):
-    """ 
+    """
     Helper function to clean up column names for VARDIS files.
     INPUT: dataframe, index of the row that contains the names,
            and an optional dictionary of column names that need
-           to be replaced as keys and the values as the new 
+           to be replaced as keys and the values as the new
            columns names
     OUTPUT: list of column names
     """
@@ -38,7 +51,7 @@ def vadir_get_cnames_replace(df_list, df_to_use):
     """
     This function determines the column differecnes between each
     of the excel files passed in.
-    INPUT: list of excel files to import and the file with the 
+    INPUT: list of excel files to import and the file with the
            right column names to use to compare against
     OUTPUT: dictionary of excel files as keys and list of unmatched
             columns as values of the dictionary
@@ -60,6 +73,9 @@ def vadir_get_cnames_replace(df_list, df_to_use):
         unmatched_c[df] = [c for c in columns if c not in columns_to_use]
     return unmatched_c
 
+
+##############################################################
+# Main functions for loading/merging VADIR data
 def vadir_concat_dfs(df_dict, replace_dict):
     """
     This function concatenates the specified dataframes into one,
@@ -68,7 +84,7 @@ def vadir_concat_dfs(df_dict, replace_dict):
     have the same columns across all dataframes in the list.
     INPUT: dictionary of years as keys and the excel file related to
            to that year to concatenate, and a dictionary of column names that need
-           to be replaced as keys and the values as the new 
+           to be replaced as keys and the values as the new
            columns names
     OUTPUT: cancatenated dataframe with all years
     """
@@ -108,7 +124,7 @@ def vadir_create_tallies(df, tally_columns):
 
 def vadir_clean_concat_df(concat_df):
     """
-    This function is very customized to the VADIR data set and cleans 
+    This function is very customized to the VADIR data set and cleans
     data we know is dirty
     INPUT: the concatenated DataFrame
     OUTPUT: clean DataFrame
@@ -121,8 +137,8 @@ def vadir_clean_concat_df(concat_df):
     #clean up county values - some are capitalized differently, spelled differently, etc
     #others are duplicated (i.e Kings should be Brooklyn)
     concat_df['County']= concat_df['County'].apply(lambda x: x.title() if type(x) == type('s') else x)
-    cleancounty = {'Bronx': 'Bronx', 'Queens': 'Queens', 'Brooklyn': 'Brooklyn', 'Kings': 'Brooklyn', 'New York': 'New York', 
-               'Manhattan': 'Manhattan', 'Richmond': 'Staten Island', 'Nyc Central Office': 'Nyc Central Office', 
+    cleancounty = {'Bronx': 'Bronx', 'Queens': 'Queens', 'Brooklyn': 'Brooklyn', 'Kings': 'Brooklyn', 'New York': 'New York',
+               'Manhattan': 'Manhattan', 'Richmond': 'Staten Island', 'Nyc Central Office': 'Nyc Central Office',
                'Manhatten': 'Manhattan', 'Nassau': 'Nassau', 'nan': 'nan'}
     concat_df['County'] = concat_df['County'].apply(cleancounty.get)
 
@@ -134,8 +150,44 @@ def vadir_clean_concat_df(concat_df):
     concat_df['School Name']= concat_df['School Name'].apply(lambda x: x.title() if type(x) == type('s') else x)
     return concat_df
 
+##############################################################
+# Main function for cleaning NYPD data
 
-#TO DO
-#Add tally columns to vadir final data set
-#Re-order columns - is this needed?
-#Create function to clean other data
+def clean_NYPD(felony_df):
+	"""
+	Function to cleanup NYPD felony data inclding, reset index,
+	create shorthand columns for dates, remove data from before 2006.
+	INPUT: dataframe loaded from 'NYPD_7_Major_Felony_Incidents.csv'
+	OUTPUT: cleaned dataframe
+	"""
+	# reset index
+	felony_df.set_index('OBJECTID', inplace = True)
+
+	#creating a new column to strip off Time from Occurrence Date
+	cname = 'Short Occurrence Date'
+	felony_df[cname]= pd.to_datetime(felony_df['Occurrence Date'])
+	felony_df[cname] = [d.strftime('%Y-%m-%d') if not pd.isnull(d) else ''
+						for d in felony_df['Short Occurrence Date']]
+
+	#removing data prior to 2006 (by occurence date b/c year has issues)
+	felony_df_2006 = felony_df[felony_df["Short Occurrence Date"]>'2005-12-31']
+	felony_df_2006 = felony_df_2006.copy() #trying to avoid subsetting errors
+
+	# Fixing years??
+	#felony_df_2006['Occurrence Year']
+
+	# Create column for month order
+	month_order = {'Jan':'01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+				   'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+				   'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
+	cname2 = 'Occurrence Month Ordered'
+	felony_df_2006[cname2] = [month_order[m] + ' ' + m
+							  for m in felony_df_2006['Occurrence Month']]
+
+	# Create column for day order
+	day_order = {'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7}
+	cname3 = 'Day of Week Ordered'
+	felony_df_2006[cname3] = [str(day_order[d]) + ' ' + d
+							  for d in felony_df_2006['Day of Week']]
+
+	return felony_df_2006						  
