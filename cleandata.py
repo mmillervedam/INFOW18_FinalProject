@@ -170,24 +170,30 @@ def clean_NYPD(felony_df):
 						for d in felony_df['Short Occurrence Date']]
 
 	#removing data prior to 2006 (by occurence date b/c year has issues)
-	felony_df_2006 = felony_df[felony_df["Short Occurrence Date"]>'2005-12-31']
-	felony_df_2006 = felony_df_2006.copy() #trying to avoid subsetting errors
-
-	# Fixing years??
-	#felony_df_2006['Occurrence Year']
+    rows_to_drop = felony_df[felony_df["Short Occurrence Date"]<='2005-12-31'].index
+    felony_df.drop(rows_to_drop, inplace=True)
+    
+	# Fixing Occurrence year incase some are still mislabeled
+	felony_df['Occurrence Year'] = felony_df["Short Occurrence Date"].apply(lambda x: x[:4])
 
 	# Create column for month order
 	month_order = {'Jan':'01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
 				   'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
 				   'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
 	cname2 = 'Occurrence Month Ordered'
-	felony_df_2006[cname2] = [month_order[m] + ' ' + m
-							  for m in felony_df_2006['Occurrence Month']]
+	felony_df[cname2] = [month_order[m] + ' ' + m
+						 for m in felony_df['Occurrence Month']]
 
 	# Create column for day order
-	day_order = {'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7}
+	day_order = {'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4,
+                 'Friday': 5, 'Saturday': 6, 'Sunday': 7}
 	cname3 = 'Day of Week Ordered'
-	felony_df_2006[cname3] = [str(day_order[d]) + ' ' + d
-							  for d in felony_df_2006['Day of Week']]
-
+	felony_df[cname3] = [str(day_order[d]) + ' ' + d
+						 for d in felony_df['Day of Week']]
+    
+    # Create column for school year
+    felony_df['Occurrence Year'] = felony_df['Occurrence Year'].astype(np.int64)
+    school_year = felony_df['Occurrence Year'] - (felony_df['Occurrence Month Ordered'] < '08')
+    felony_df['School Year'] =  school_year
+    
 	return felony_df_2006						  
