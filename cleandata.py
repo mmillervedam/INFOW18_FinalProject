@@ -75,7 +75,7 @@ def vadir_get_cnames_replace(df_list, df_to_use):
 
 
 ##############################################################
-# Main functions for loading/merging VADIR data
+# Helper functions for loading/merging VADIR data
 def vadir_concat_dfs(df_dict, replace_dict):
     """
     This function concatenates the specified dataframes into one,
@@ -151,49 +151,100 @@ def vadir_clean_concat_df(concat_df):
     return concat_df
 
 ##############################################################
+# Main function for loading and cleaning VADIR data
+
+def load_and_clean_VADIR():
+    """
+    Function to load, join and clean VADIR (performs a series
+    of functions from the cleandata module). Returns school
+    dataframe ready for analysis.
+    """
+    # Raw data for each year
+    RAW_DATA_DICT = {2006: 'VADIR_2006.xls', 2007: 'VADIR_2007.xls',
+                     2008: 'VADIR_2008.xls', 2009: 'VADIR_2009.xls',
+                     2010: 'VADIR_2010.xls', 2011: 'VADIR_2011.xls',
+                     2012: 'VADIR_2012.xls', 2013: 'VADIR_2013.xls',
+                     2014: 'VADIR_2014.xls'}
+
+    # Duplicate name columns in raw files (and their replacements)
+    DUP_COLS = {'County Name':'County',
+                'District Name': 'District',
+                'BEDS CODE': 'BEDS Code',
+                'False Alarm':'Bomb Threat False Alarm',
+                'Other Sex offenses': 'Other Sex Offenses',
+                'Use Possession or Sale of Drugs': 'Drug Possession',
+                'Use Possession or Sale of Alcohol': 'Alcohol Possession',
+                'Other Disruptive Incidents': 'Other Disruptive Incidents',
+                'Drug Possesion': 'Drug Possession',
+                'Alcohol Possesion': 'Alcohol Possession',
+                'Other Disruptive': 'Other Disruptive Incidents'}
+
+    # Read in raw data and correct duplicate columns
+    vadir_df = cd.vadir_concat_dfs(RAW_DATA_DICT, DUP_COLS)
+
+    # Reorder columns putting demographic information first.
+    DEMO_COLS = ['School Name', 'School Type', 'School Year', 'BEDS Code',
+                 'County', 'District', 'Enrollment', 'Grade Organization',
+                 'Need/Resource Category']
+    vadir_df = cd.vadir_reorder_columns(vadir_df, DEMO_COLS)
+
+    # Create Columns for  tot incidents and w/ and w/o weapons
+    COLUMNS = vadir_df.columns.tolist()
+    INCIDENT_COLS = [c for c in COLUMNS if c not in DEMO_COLS]
+    vadir_df = cd.vadir_create_tallies(vadir_df, INCIDENT_COLS)
+
+    # fix name capitalization, remove comment rows and duplicate names/counties
+    school_df = cd.vadir_clean_concat_df(vadir_df)
+
+    return school_df
+
+
+##############################################################
 # Main function for cleaning NYPD data
 
-def clean_NYPD(felony_df):
-	"""
-	Function to cleanup NYPD felony data inclding, reset index,
-	create shorthand columns for dates, remove data from before 2006.
-	INPUT: dataframe loaded from 'NYPD_7_Major_Felony_Incidents.csv'
-	OUTPUT: cleaned dataframe
-	"""
-	# reset index
-	felony_df.set_index('OBJECTID', inplace = True)
+def load_and_clean_NYPD():
+    """
+    Function to cleanup NYPD felony data inclding, reset index,
+    create shorthand columns for dates, remove data from before 2006.
+    INPUT: dataframe loaded from 'NYPD_7_Major_Felony_Incidents.csv'
+    OUTPUT: cleaned dataframe
+    """
+    felony_df = pd.read_csv('NYPD_7_Major_Felony_Incidents.csv',
+                            index_col = False)
+    # reset index
+    felony_df.set_index('OBJECTID', inplace = True)
 
-	#creating a new column to strip off Time from Occurrence Date
-	cname = 'Short Occurrence Date'
-	felony_df[cname]= pd.to_datetime(felony_df['Occurrence Date'])
-	felony_df[cname] = [d.strftime('%Y-%m-%d') if not pd.isnull(d) else ''
-						for d in felony_df['Short Occurrence Date']]
+    #creating a new column to strip off Time from Occurrence Date
+    cname = 'Short Occurrence Date'
+    felony_df[cname]= pd.to_datetime(felony_df['Occurrence Date'])
+    felony_df[cname] = [d.strftime('%Y-%m-%d') if not pd.isnull(d) else '' for d in felony_df['Short Occurrence Date']]
 
-	#removing data prior to 2006 (by occurence date b/c year has issues)
-    rows_to_drop = felony_df[felony_df["Short Occurrence Date"]<='2005-12-31'].index
-    felony_df.drop(rows_to_drop, inplace=True)
-    
-	# Fixing Occurrence year incase some are still mislabeled
-	felony_df['Occurrence Year'] = felony_df["Short Occurrence Date"].apply(lambda x: x[:4])
+    #removing data prior to 2006 (by occurence date b/c year has issues)
+    rows_to_drop = felony_df[felony_df["Short Occurrence Date"] <= '2005-12-31']
+    felony_df.drop(rows_to_drop.index, inplace=True)
 
-	# Create column for month order
-	month_order = {'Jan':'01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-				   'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-				   'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
-	cname2 = 'Occurrence Month Ordered'
-	felony_df[cname2] = [month_order[m] + ' ' + m
-						 for m in felony_df['Occurrence Month']]
+    # Fixing Occurrence year incase some are still mislabeled
+    felony_df['Occurrence Year'] = felony_df["Short Occurrence Date"
+                                             ].apply(lambda x: x[:4])
 
-	# Create column for day order
-	day_order = {'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4,
-                 'Friday': 5, 'Saturday': 6, 'Sunday': 7}
-	cname3 = 'Day of Week Ordered'
-	felony_df[cname3] = [str(day_order[d]) + ' ' + d
-						 for d in felony_df['Day of Week']]
-    
+    # Create column for month order
+    month_order = {'Jan':'01(Jan)', 'Feb': '02(Feb)', 'Mar': '03(Mar)',
+                   'Apr': '04(Apr)', 'May': '05(May)', 'Jun': '06(Jun)',
+                   'Jul': '07(Jul)', 'Aug': '08(Aug)', 'Sep': '09(Sep)',
+                   'Oct': '10(Oct)', 'Nov': '11(Nov)', 'Dec': '12(Dec)'}
+    cname2 = 'Occurrence Month Ordered'
+    felony_df[cname2] = felony_df['Occurrence Month'].map(month_order)
+
+    # Create column for day order
+    day_order = {'Monday': '1 (Mon)', 'Tuesday': '2 (Tues)',
+                 'Wednesday': '3 (Wed)', 'Thursday': '4 (Thur)',
+                 'Friday': '5 (Fri)', 'Saturday': '6 (Sat)',
+                 'Sunday': '7 (Sun)'}
+    cname3 = 'Day of Week Ordered'
+    felony_df[cname3] = felony_df['Day of Week'].map(day_order)
+
     # Create column for school year
     felony_df['Occurrence Year'] = felony_df['Occurrence Year'].astype(np.int64)
-    school_year = felony_df['Occurrence Year'] - (felony_df['Occurrence Month Ordered'] < '08')
-    felony_df['School Year'] =  school_year
-    
-	return felony_df_2006						  
+    felony_df['School Year'] =  felony_df['Occurrence Year'] - (felony_df['Occurrence Month Ordered'] < '08')
+
+    return felony_df
