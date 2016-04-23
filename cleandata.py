@@ -247,4 +247,5 @@ def load_and_clean_NYPD():
     felony_df['Occurrence Year'] = felony_df['Occurrence Year'].astype(np.int64)
     felony_df['School Year'] =  felony_df['Occurrence Year'] - (felony_df['Occurrence Month Ordered'] < '08')
 
+    print('... loaded NYPD felony data: {} observations'.format(len(felony_df)))
     return felony_df
