@@ -191,7 +191,7 @@ def load_and_clean_VADIR():
     # Create Columns for  tot incidents and w/ and w/o weapons
     COLUMNS = vadir_df.columns.tolist()
     INCIDENT_COLS = [c for c in COLUMNS if c not in DEMO_COLS]
-    vadir_df = dir_create_tallies(vadir_df, INCIDENT_COLS)
+    vadir_df = vadir_create_tallies(vadir_df, INCIDENT_COLS)
 
     # fix name capitalization, remove comment rows and duplicate names/counties
     school_df = vadir_clean_concat_df(vadir_df)
