@@ -180,21 +180,21 @@ def load_and_clean_VADIR():
                 'Other Disruptive': 'Other Disruptive Incidents'}
 
     # Read in raw data and correct duplicate columns
-    vadir_df = cd.vadir_concat_dfs(RAW_DATA_DICT, DUP_COLS)
+    vadir_df = vadir_concat_dfs(RAW_DATA_DICT, DUP_COLS)
 
     # Reorder columns putting demographic information first.
     DEMO_COLS = ['School Name', 'School Type', 'School Year', 'BEDS Code',
                  'County', 'District', 'Enrollment', 'Grade Organization',
                  'Need/Resource Category']
-    vadir_df = cd.vadir_reorder_columns(vadir_df, DEMO_COLS)
+    vadir_df = vadir_reorder_columns(vadir_df, DEMO_COLS)
 
     # Create Columns for  tot incidents and w/ and w/o weapons
     COLUMNS = vadir_df.columns.tolist()
     INCIDENT_COLS = [c for c in COLUMNS if c not in DEMO_COLS]
-    vadir_df = cd.vadir_create_tallies(vadir_df, INCIDENT_COLS)
+    vadir_df = dir_create_tallies(vadir_df, INCIDENT_COLS)
 
     # fix name capitalization, remove comment rows and duplicate names/counties
-    school_df = cd.vadir_clean_concat_df(vadir_df)
+    school_df = vadir_clean_concat_df(vadir_df)
 
     return school_df
 
