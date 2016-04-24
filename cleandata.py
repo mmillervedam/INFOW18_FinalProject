@@ -73,6 +73,37 @@ def vadir_get_cnames_replace(df_list, df_to_use):
         unmatched_c[df] = [c for c in columns if c not in columns_to_use]
     return unmatched_c
 
+def fix_case(x):
+    """Function to put a school name in the correct case"""
+    if not x:
+        return x
+    elif x[:3] in ['PS ', 'JHS', 'MS ']:
+        return x[:3] + x[3:].title()
+    else:
+        return x.title()
+
+def fill_in_boroughs(school_df):
+    """ 
+    Helper function to fill in boroughs
+    INPUT: school_df with 'County' and 'BEDS Code' columns
+    OUTPUT: modifies school_df to fill in boroughs and returns new dataframe
+    """
+
+    #get dataframe of BEDS Codes, their Counties and the count of each within the dataset
+    beds_county_df = school_df[school_df['County'].notnull()][['BEDS Code','County']] \
+                     .groupby(['BEDS Code', 'County']).size().reset_index(name='count')
+
+    #get county and max count from the previous data set for joining
+    beds_county_max_df = beds_county_df[['BEDS Code', 'count']].groupby(['BEDS Code']).max().reset_index()
+
+    #now will join the two datasets to make one master and assume that the county should be the one that appears the most
+    county_map = beds_county_df.merge(beds_county_max_df, how='inner', on = ['BEDS Code', 'count'])[['BEDS Code', 'County']] \
+                               .set_index('BEDS Code').to_dict()
+
+    #map counties using the dictionary
+    school_df.County = school_df['BEDS Code'].map(county_map['County'])
+
+    return school_df
 
 ##############################################################
 # Helper functions for loading/merging VADIR data
@@ -115,7 +146,7 @@ def vadir_create_tallies(df, tally_columns):
     df[tally_columns] = df[tally_columns].apply(lambda x: pd.to_numeric(x))
     df['Total Incidents'] = df[tally_columns].sum(axis=1)
 
-    weapon_cols = [x for x in tally_columns if x[-3:] == '_ww']
+    weapon_cols = [x for x in tally_columns if x[-3:] in ['_ww', '_ts', '_oc']]
     df['Incidents w/ Weapons'] = df[weapon_cols].sum(axis=1)
 
     no_weapon_cols = [x for x in tally_columns if x[-3:] == '_nw']
@@ -148,6 +179,13 @@ def vadir_clean_concat_df(concat_df):
 
     # Adjust 'School Name' values to all have the same capitalization
     concat_df['School Name']= concat_df['School Name'].apply(lambda x: x.title() if type(x) == type('s') else x)
+
+    # Adjust 'School Name' values to have the right capitalization for PS, JHS, and MS to match
+    # school location LEGAL NAME
+    concat_df['School Name']= concat_df['School Name'].apply(fix_case)
+
+    #fill in missing boroughs
+    concat_df = fill_in_boroughs(concat_df)
     return concat_df
 
 ##############################################################
@@ -249,3 +287,25 @@ def load_and_clean_NYPD():
 
     print('... loaded NYPD felony data: {} observations'.format(len(felony_df)))
     return felony_df
+
+##############################################################
+# Main function for cleaning borough data
+
+def load_and_clean_BORPOP():
+    """
+    Function to load and clean up NYC Borough Population data
+    INPUT: None
+    OUTPUT: cleaned DataFrame
+    """
+    borough_df = pd.read_csv("New_York_City_Population_By_Boroughs.csv")
+
+    # capitalize borough and set them as index (to match NYPD Data)
+    borough_df.Borough = borough_df.Borough.apply(lambda x : x.upper())
+    borough_df.set_index('Borough', inplace = True)
+
+    # Add areas (measured in sq miles, source: wikipedia)
+    borough_df["Area(sq mi)"] = pd.Series({'BRONX': 42.47 , 'BROOKLYN': 69.5, 'MANHATTAN': 22.82 ,
+                                    'QUEENS': 108.1 , 'STATEN ISLAND': 57.92 })
+
+    # return final cleaned data frame
+    return borough_df
