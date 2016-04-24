@@ -83,7 +83,7 @@ def fix_case(x):
         return x.title()
 
 def fill_in_boroughs(school_df):
-    """ 
+    """
     Helper function to fill in boroughs
     INPUT: school_df with 'County' and 'BEDS Code' columns
     OUTPUT: modifies school_df to fill in boroughs and returns new dataframe
@@ -141,17 +141,6 @@ def vadir_reorder_columns(df, beginner_columns):
     df_columns = beginner_columns + [c for c in df.columns.tolist() if c not in beginner_columns]
     new_df = df[df_columns]
     return new_df
-
-def vadir_create_tallies(df, tally_columns):
-    df[tally_columns] = df[tally_columns].apply(lambda x: pd.to_numeric(x))
-    df['Total Incidents'] = df[tally_columns].sum(axis=1)
-
-    weapon_cols = [x for x in tally_columns if x[-3:] in ['_ww', '_ts', '_oc']]
-    df['Incidents w/ Weapons'] = df[weapon_cols].sum(axis=1)
-
-    no_weapon_cols = [x for x in tally_columns if x[-3:] == '_nw']
-    df['Incidents w/o Weapons'] = df[no_weapon_cols].sum(axis=1)
-    return df
 
 def vadir_clean_concat_df(concat_df):
     """
@@ -225,11 +214,6 @@ def load_and_clean_VADIR():
                  'County', 'District', 'Enrollment', 'Grade Organization',
                  'Need/Resource Category']
     vadir_df = vadir_reorder_columns(vadir_df, DEMO_COLS)
-
-    # Create Columns for  tot incidents and w/ and w/o weapons
-    COLUMNS = vadir_df.columns.tolist()
-    INCIDENT_COLS = [c for c in COLUMNS if c not in DEMO_COLS]
-    vadir_df = vadir_create_tallies(vadir_df, INCIDENT_COLS)
 
     # fix name capitalization, remove comment rows and duplicate names/counties
     school_df = vadir_clean_concat_df(vadir_df)
